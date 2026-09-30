@@ -434,6 +434,89 @@ h1 { margin-bottom: 8px; font: 42px/1.1 var(--serif); font-weight: 400; letter-s
 .toast-enter-from, .toast-leave-to { opacity: 0; transform: translateY(8px); }
 @keyframes toast-arrive { from { transform: translateY(8px); } to { transform: translateY(0); } }
 
+/* Quiet, consistent details across every view. */
+body { font-size: 15px; line-height: 1.55; }
+h1, .page-title-row h1 { font-size: clamp(2rem, 4vw, 2.625rem); line-height: 1.08; letter-spacing: -.035em; }
+.primary-button, .outline-button, .role-switch, .text-input, .report-form select { min-height: 42px; border-radius: 9px; }
+.primary-button { box-shadow: none; transition: background .18s ease, transform .18s ease; }
+.primary-button:hover { box-shadow: none; }
+.card-surface, .meal-card, .aside-card { border-radius: 10px; box-shadow: none; }
+.meal-card:hover, .food-group-card:hover { box-shadow: 0 5px 14px rgb(35 48 39 / 6%); }
+.text-input, .report-form select { max-width: 100%; padding-right: 12px; padding-left: 12px; color: var(--ink); background: var(--white); transition: border-color .18s ease, box-shadow .18s ease; }
+.report-form select { width: 100%; }
+.text-input:hover, .report-form select:hover { border-color: #c4cdc1; }
+.text-input:focus-visible, .report-form select:focus-visible { border-color: #809a83; outline: none; box-shadow: 0 0 0 3px rgb(126 157 130 / 18%); }
+.icon-button, .add-slot, .mobile-nav button { min-width: 40px; min-height: 40px; }
+.nav-link { min-height: 46px; }
+.mobile-nav button { min-width: 54px; }
+.meal-card, .aside-card, .card-surface { border-color: #e6e5de; }
+
+@media (max-width: 800px) {
+  .app-shell { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .page-content { padding: 25px 18px 36px; }
+  .welcome-row { flex-wrap: wrap; }
+  .welcome-row > div { min-width: 0; }
+  .welcome-row h1, .patient-detail-title h1 { overflow-wrap: anywhere; }
+  .mobile-nav { height: calc(68px + env(safe-area-inset-bottom)); padding-top: 7px; }
+  .mobile-nav button { min-height: 44px; }
+  .log-sheet { padding-right: max(20px, env(safe-area-inset-right)); padding-left: max(20px, env(safe-area-inset-left)); }
+}
+@media (max-width: 420px) {
+  .page-content { padding-right: 16px; padding-left: 16px; }
+  .page-title-row { align-items: flex-start; }
+  .welcome-row { gap: 14px; }
+  .welcome-row > div { flex: 1 1 100%; }
+  .welcome-row .primary-button:not(.log-cta), .welcome-row .outline-button { min-height: 44px; }
+  .week-day { min-height: 60px; }
+  .meal-type-options { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .type-option { min-height: 58px; }
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: #e6e9e3;
+    --muted: #a0a89f;
+    --line: #353c36;
+    --canvas: #171b18;
+    --white: #222823;
+    --green: #a5c0a7;
+    --green-dark: #b6ceb8;
+    --green-pale: #29352d;
+    --coral: #e3a18a;
+  }
+  body, .app-shell { color: var(--ink); background: var(--canvas); }
+  .sidebar { border-color: var(--line); background: #1c211d; }
+  .topbar { border-color: var(--line); background: rgb(23 27 24 / 94%); }
+  .mobile-nav { border-color: var(--line); background: rgb(28 33 29 / 96%); }
+  .brand, .section-heading h2, .compact-heading h2, .meal-title, .profile-name strong,
+  .patient-row-info strong, .settings-row strong, .profile-fields strong { color: var(--ink); }
+  .nav-link, .breadcrumb, .sync-status, .subhead, .meal-time, .food-chips span,
+  .diary-food-list > div, .patient-row-info small, .settings-row small { color: #abb2a9; }
+  .nav-link:hover, .nav-link.active, .mobile-nav button.active { color: #c5ddc6; background: #29352d; }
+  .sidebar-xp, .meal-card, .aside-card, .card-surface, .diary-card, .patient-list-panel,
+  .log-sheet, .week-day, .text-input, .report-form select, .type-option { color: var(--ink); border-color: var(--line); background: #222823; }
+  .meal-card-empty { background: #1d231f; }
+  .food-chips span, .composer-meta, .clinician-meal-extra, .range-control { background: #2a302b; }
+  .week-day.selected, .type-option.chosen { color: #c5ddc6; border-color: #718d75; background: #29372d; }
+  .week-day > strong, .week-day.selected > strong, .profile-card-title > div h2,
+  .diary-day-heading h2, .patient-info-strip strong, .diary-food-list > div { color: #e0e5de; }
+  .group-coral { background: #392a27; }
+  .group-green { background: #29352d; }
+  .group-yellow { background: #383326; }
+  .group-blue { background: #293432; }
+  .explorer-hero { background: linear-gradient(110deg, #29352d, #343126); }
+  .aside-quote { background: #382e28; }
+  .aside-quote p { color: #e3c6ae; }
+  .day-overview { border-color: var(--line); background: #222823; }
+  .patient-row:hover { background: #292f2a; }
+  .profile-card-title, .profile-footnote, .weight-current, .settings-avatar,
+  .settings-row, .patient-diary-date, .clinician-meal { border-color: var(--line); }
+  .report-form select, .text-input { color-scheme: dark; }
+  .text-input::placeholder { color: #858e85; }
+  .outline-button { color: #c0cfc0; border-color: #465148; background: #222823; }
+  .icon-button:hover, .aside-card-heading button { background: #303a32; }
+  .mobile-log-button { border-color: var(--canvas); }
+}
 @media (min-width: 1150px) {
   .modal-backdrop { align-items: center; }
   .log-sheet { border-radius: 17px; }
