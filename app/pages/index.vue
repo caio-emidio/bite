@@ -241,6 +241,10 @@ function nextStep() {
 }
 
 function saveMeal() {
+  if (!formTime.value) {
+    formError.value = 'Add an approximate time for this moment.'
+    return
+  }
   const items = formFoods.value
     .filter(food => food.name.trim())
     .map(food => ({ ...food, name: food.name.trim(), quantity: String(food.quantity).trim() || '1' }))
