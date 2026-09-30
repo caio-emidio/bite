@@ -105,6 +105,8 @@ const formFullness = ref<number | null>(null)
 const formError = ref('')
 const photoInput = ref<HTMLInputElement | null>(null)
 const xp = ref(1240)
+const xpFeedback = ref('')
+let xpFeedbackTimeout: ReturnType<typeof setTimeout> | undefined
 const expandedMealId = ref<string | null>(null)
 const printAllDetails = ref(false)
 const profileEditing = ref(false)
@@ -119,6 +121,17 @@ const todayMeals = computed(() => meals.value.filter(meal => meal.patientId === 
 const groupedToday = computed(() => {
   const order: MealType[] = ['Breakfast', 'Lunch', 'Snack', 'Dinner', 'Other']
   return order.map(type => ({ type, meals: todayMeals.value.filter(item => item.type === type) }))
+})
+const openMealTypes = computed(() => groupedToday.value.filter(slot => slot.type !== 'Other' && !slot.meals.length).map(slot => slot.type))
+const activeStreak = computed(() => {
+  const date = new Date(`${todayKey}T12:00:00`)
+  if (!mealsForDate(todayKey).length) date.setDate(date.getDate() - 1)
+  let days = 0
+  while (mealsForDate(dateKey(date)).length) {
+    days++
+    date.setDate(date.getDate() - 1)
+  }
+  return days
 })
 const weekDays = computed(() => Array.from({ length: 7 }, (_, index) => {
   const day = new Date(today)
@@ -178,14 +191,23 @@ watch(logOpen, async open => {
   if (open) {
     document.addEventListener('keydown', onDialogKeyDown)
     await nextTick()
-    dialogRef.value?.querySelector<HTMLElement>('button, input, select, textarea')?.focus()
+    dialogRef.value?.querySelector<HTMLElement>('.food-name-input')?.focus()
   } else {
     document.removeEventListener('keydown', onDialogKeyDown)
     focusReturn.value?.focus()
   }
 })
 
-onBeforeUnmount(() => document.removeEventListener('keydown', onDialogKeyDown))
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onDialogKeyDown)
+  if (xpFeedbackTimeout) clearTimeout(xpFeedbackTimeout)
+})
+
+function showXpFeedback(points: number) {
+  xpFeedback.value = `A little win · +${points} XP`
+  if (xpFeedbackTimeout) clearTimeout(xpFeedbackTimeout)
+  xpFeedbackTimeout = setTimeout(() => { xpFeedback.value = '' }, 2800)
+}
 
 function saveMeasurement() {
   const value = Number(measurementValue.value)
@@ -194,6 +216,7 @@ function saveMeasurement() {
   showMeasurementInput.value = false
   measurementValue.value = ''
   xp.value += 5
+  showXpFeedback(5)
 }
 
 function addFood() {
@@ -209,19 +232,19 @@ function removeFood(index: number) {
 }
 
 function nextStep() {
-  if (logStep.value === 1 && !formTime.value) {
-    formError.value = 'Choose a time for this moment.'
-    return
-  }
-  if (logStep.value === 2 && !formFoods.value.some(food => food.name.trim())) {
+  if (!formFoods.value.some(food => food.name.trim())) {
     formError.value = 'Add at least one food to keep your story going.'
     return
   }
   formError.value = ''
-  logStep.value = Math.min(logStep.value + 1, 3)
+  logStep.value = 2
 }
 
 function saveMeal() {
+  if (!formTime.value) {
+    formError.value = 'Add an approximate time for this moment.'
+    return
+  }
   const items = formFoods.value
     .filter(food => food.name.trim())
     .map(food => ({ ...food, name: food.name.trim(), quantity: String(food.quantity).trim() || '1' }))
@@ -247,7 +270,9 @@ function saveMeal() {
     Object.assign(existing, meal)
   } else {
     meals.value.push(meal)
-    xp.value += 10 + (formPhoto.value ? 15 : 0)
+    const earnedXp = 10 + (formPhoto.value ? 15 : 0)
+    xp.value += earnedXp
+    showXpFeedback(earnedXp)
   }
   logOpen.value = false
 }
@@ -356,7 +381,7 @@ function openPatient(patient: typeof patients[number]) {
             <div>
               <div class="eyebrow"><span class="eyebrow-dot"></span>{{ prettyDate }}</div>
               <h1>{{ greeting }}, Caio<span class="wave">✳</span></h1>
-              <p class="subhead">A little snapshot of your day, so far.</p>
+              <p class="subhead">Your day, your pace. Here’s what’s part of it so far.</p>
             </div>
             <button class="primary-button log-cta" @click="openLogger()"><span class="plus">+</span> Log a meal <span class="button-arrow">↗</span></button>
           </section>
@@ -366,6 +391,11 @@ function openPatient(patient: typeof patients[number]) {
               <div class="section-heading">
                 <div><div class="section-kicker">YOUR {{ weekdayUppercase }}</div><h2>Today’s food journey</h2></div>
                 <button class="text-button" @click="setView('diary')">See diary <span>↗</span></button>
+              </div>
+              <div class="day-overview" aria-live="polite">
+                <span class="day-overview-mark">✦</span>
+                <p><strong>{{ todayMeals.length }} {{ todayMeals.length === 1 ? 'meal' : 'meals' }} logged</strong><span>{{ todayMeals.length ? `${todayMeals.map(meal => meal.type.toLowerCase()).join(', ')} so far` : 'Start wherever you like' }}</span></p>
+                <span class="day-open">{{ openMealTypes.length ? `Still open: ${openMealTypes.join(' · ')}` : 'Your day is all here' }}</span>
               </div>
               <div class="journey-list">
                 <article v-for="(slot, index) in groupedToday" :key="slot.type" class="journey-row" :class="{ 'has-meal': slot.meals.length, 'next-up': !slot.meals.length && index === groupedToday.findIndex(item => !item.meals.length) }">
@@ -397,12 +427,12 @@ function openPatient(patient: typeof patients[number]) {
 
             <aside class="home-aside">
               <section class="streak-card">
-                <div class="streak-top"><span class="streak-flower">✳</span><span class="streak-label">SHOWING UP, YOUR WAY</span><span class="streak-dots">···</span></div>
-                <div class="streak-number">4 <span>days</span></div>
-                <p>You’ve checked in four days<br>in a row. Look at you go.</p>
+                <div class="streak-top"><span class="streak-flower">✳</span><span class="streak-label">A RHYTHM OF YOUR OWN</span></div>
+                <div class="streak-number">{{ activeStreak }} <span>{{ activeStreak === 1 ? 'day' : 'days' }}</span></div>
+                <p>{{ activeStreak ? 'You showed up for yourself. That counts.' : 'Whenever you’re ready, your next moment is welcome.' }}</p>
                 <div class="streak-week">
                   <span v-for="(day, i) in weekDays" :key="day.date" class="streak-day">
-                    <i :class="{ checked: i > 2 || mealsForDate(day.date).length > 0, today: day.date === todayKey }">{{ i > 2 || mealsForDate(day.date).length ? '✓' : '' }}</i>
+                    <i :class="{ checked: mealsForDate(day.date).length > 0, today: day.date === todayKey }">{{ mealsForDate(day.date).length ? '✓' : '' }}</i>
                     <small>{{ day.label.slice(0, 1) }}</small>
                   </span>
                 </div>
@@ -518,15 +548,14 @@ function openPatient(patient: typeof patients[number]) {
     <Transition name="sheet">
       <div v-if="logOpen" class="modal-backdrop" @click.self="logOpen = false" @keydown.esc="logOpen = false">
         <section ref="dialogRef" class="log-sheet" role="dialog" aria-modal="true" aria-labelledby="log-title">
-          <div class="sheet-handle"></div><div class="sheet-header"><div><div class="section-kicker">A LITTLE MOMENT FOR YOU</div><h2 id="log-title">{{ editingId ? 'A meal, remembered.' : logStep === 1 ? 'What are we having?' : logStep === 2 ? 'What did you have?' : 'Anything else to remember?' }}</h2></div><button class="close-button" aria-label="Close meal form" @click="logOpen = false">×</button></div>
-          <div class="step-indicator"><span v-for="step in 3" :key="step" :class="{ filled: step <= logStep }"></span><small>{{ logStep }} of 3</small></div>
+          <div class="sheet-handle"></div><div class="sheet-header"><div><div class="section-kicker">A LITTLE MOMENT FOR YOU</div><h2 id="log-title">{{ editingId ? 'A meal, remembered.' : logStep === 1 ? 'What did you enjoy?' : 'Anything else to remember?' }}</h2></div><button class="close-button" aria-label="Close meal form" @click="logOpen = false">×</button></div>
+          <div class="step-indicator"><span v-for="step in 2" :key="step" :class="{ filled: step <= logStep }"></span><small>{{ logStep }} of 2 · details are optional</small></div>
           <div class="sheet-body">
             <template v-if="logStep === 1">
-              <label class="field-label">Let’s give it a name</label><div class="meal-type-options"><button v-for="type in ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Other'] as const" :key="type" class="type-option" :class="{ chosen: formType === type }" @click="formType = type"><span>{{ type === 'Breakfast' ? '☼' : type === 'Lunch' ? '◒' : type === 'Dinner' ? '☾' : type === 'Snack' ? '✳' : '·' }}</span>{{ type }}</button></div>
-              <label class="field-label time-label" for="meal-time">When did it happen?</label><input id="meal-time" v-model="formTime" class="text-input time-input" type="time">
-            </template>
-            <template v-else-if="logStep === 2">
-              <p class="field-hint">No need to be exact. Just the things that come to mind.</p><div v-for="(food, index) in formFoods" :key="index" class="food-entry"><input v-model="food.name" :aria-label="`Food ${index + 1}`" class="text-input food-name-input" :placeholder="index === 0 ? 'e.g. avocado toast' : 'Another food or drink'"><input v-model="food.quantity" :aria-label="`Quantity for food ${index + 1}`" class="text-input quantity-input" type="number" min="0" step="any" placeholder="1"><select v-model="food.unit" :aria-label="`Unit for food ${index + 1}`" class="text-input unit-select"><option v-for="unit in ['g', 'kg', 'ml', 'L', 'slice', 'piece', 'tbsp', 'tsp', 'cup', 'glass', 'serving', 'bowl', 'handful', 'other']" :key="unit">{{ unit }}</option></select><button class="remove-food" :aria-label="`Remove food ${index + 1}`" @click="removeFood(index)">×</button></div><button class="add-food-button" @click="addFood"><span>+</span> Add another food</button>
+              <div class="composer-meta"><label class="field-label">This was</label><div class="meal-type-options"><button v-for="type in ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Other'] as const" :key="type" class="type-option" :class="{ chosen: formType === type }" @click="formType = type"><span>{{ type === 'Breakfast' ? '☼' : type === 'Lunch' ? '◒' : type === 'Dinner' ? '☾' : type === 'Snack' ? '✳' : '·' }}</span>{{ type }}</button></div><label class="field-label time-label" for="meal-time">Around what time?</label><input id="meal-time" v-model="formTime" class="text-input time-input" type="time"></div>
+              <label class="field-label food-prompt">Tell me about it</label>
+              <p class="field-hint">A word or two is plenty. Add as much or as little as you like.</p>
+              <div v-for="(food, index) in formFoods" :key="index" class="food-entry"><input v-model="food.name" :aria-label="`Food ${index + 1}`" class="text-input food-name-input" :placeholder="index === 0 ? 'What did you eat or drink?' : 'And anything else?'" @keydown.enter.prevent="index === formFoods.length - 1 ? addFood() : undefined"><button class="remove-food" :aria-label="`Remove food ${index + 1}`" @click="removeFood(index)">×</button><details class="food-amount"><summary>{{ food.quantity ? `${food.quantity} ${food.unit}` : 'Add an amount (optional)' }}</summary><div><input v-model="food.quantity" :aria-label="`Quantity for food ${index + 1}`" class="text-input quantity-input" type="number" min="0" step="any" placeholder="1"><select v-model="food.unit" :aria-label="`Unit for food ${index + 1}`" class="text-input unit-select"><option v-for="unit in ['g', 'kg', 'ml', 'L', 'slice', 'piece', 'tbsp', 'tsp', 'cup', 'glass', 'serving', 'bowl', 'handful', 'other']" :key="unit">{{ unit }}</option></select></div></details></div><button class="add-food-button" @click="addFood"><span>+</span> Add another food</button>
             </template>
             <template v-else>
               <p class="field-hint">Only if you feel like it. These little details are completely optional.</p>
@@ -536,10 +565,11 @@ function openPatient(patient: typeof patients[number]) {
             </template>
             <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
           </div>
-          <div class="sheet-footer"><button v-if="logStep > 1" class="back-button" @click="logStep--">← Back</button><button v-else class="back-button" @click="logOpen = false">Maybe later</button><button v-if="logStep < 3" class="primary-button sheet-next" @click="nextStep">Keep going <span>→</span></button><button v-else class="primary-button sheet-next" @click="saveMeal">{{ editingId ? 'Save changes' : 'Save this moment' }} <span>✦</span></button></div>
+          <div class="sheet-footer"><button v-if="logStep > 1" class="back-button" @click="logStep = 1">← Back</button><button v-else class="back-button" @click="logOpen = false">Maybe later</button><button v-if="logStep === 1" class="details-button" @click="nextStep">Add a little detail <span>→</span></button><button class="primary-button sheet-next" @click="saveMeal">{{ editingId ? 'Save changes' : 'Save this moment' }} <span>✦</span></button></div>
         </section>
       </div>
     </Transition>
+    <Transition name="toast"><div v-if="xpFeedback" class="xp-toast" role="status" aria-live="polite"><span>✦</span>{{ xpFeedback }}</div></Transition>
   </div>
 </template>
 
