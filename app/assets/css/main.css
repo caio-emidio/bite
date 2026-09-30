@@ -648,3 +648,159 @@ h1, .page-title-row h1 { font-size: clamp(2rem, 4vw, 2.625rem); line-height: 1.0
   .patient-diary { margin-top: 10px; }
   .clinician-meal { break-inside: avoid; }
 }
+
+:root {
+  --type-overline: 12px;
+  --type-meta: 14px;
+  --type-body: 16px;
+  --type-card: 18px;
+  --type-section: 23px;
+}
+body { font-size: var(--type-body); line-height: 1.55; }
+h1, .page-title-row h1 { font-size: clamp(2rem, 4vw, 2.625rem); line-height: 1.08; letter-spacing: -.035em; }
+.section-heading h2, .compact-heading h2, .diary-day-heading h2 { font-size: var(--type-section); }
+.meal-title, .profile-card-title > div h2, .settings-avatar > div h2 { font-size: var(--type-card); }
+.primary-button, .outline-button, .role-switch, .text-button, .back-link, .details-button, .add-food-button,
+.type-option, .report-form label, .field-label, .profile-edit-fields label, .measurement-entry label { font-size: var(--type-meta); }
+.nav-link, .breadcrumb, .sync-status, .subhead, .meal-time, .food-chips span, .not-yet,
+.day-overview p strong, .day-overview p span, .day-open, .diary-food-list > div, .empty-state p,
+.explorer-hero-copy p, .food-group-card > p, .food-discovery-list span, .profile-fields strong,
+.profile-card-title > div p, .weight-caption, .patient-row-info strong, .patient-row-info small,
+.patient-last strong, .patient-last small, .patient-info-strip strong, .clinician-meal-time,
+.clinician-meal-content strong, .clinician-foods, .clinician-food-detail, .settings-row strong,
+.settings-row small, .report-form select, .patient-history-note, .empty-meal-copy,
+.week-day > span, .week-day > strong { font-size: var(--type-meta); }
+.primary-button, .outline-button, .role-switch, .text-input, .report-form select { min-height: 46px; }
+.text-input, .report-form select { font-size: var(--type-body); }
+.icon-button, .add-slot, .mobile-nav button { min-width: 44px; min-height: 44px; }
+.mobile-nav button { font-size: var(--type-meta); }
+.section-kicker, .sidebar-caption, .eyebrow, .streak-label, .xp-heading, .note-overline,
+.profile-fields small, .patient-info-strip small, .stat-card > span, .stat-card > small,
+.streak-day small, .quote-byline, .group-index, .soft-badge, .aside-card-heading > div,
+.explorer-total span, .week-day > span, .meal-type-pill, .range-control button,
+.patient-diary-date, .clinician-food-detail small, .report-form label, .form-error, .field-hint,
+.step-indicator small, .food-amount, .photo-picker > div small, .photo-remove,
+.xp-level span, .xp-foot, .profile-name small, .profile-footnote, .chart-y-axis,
+.chart-dates, .weight-current, .stat-card > span, .stat-card > small { font-size: var(--type-overline); }
+.meal-note, .aside-quote p, .clinician-meal-extra > p { font-size: 15px; }
+.streak-card p, .explorer-peek > p, .aside-link, .food-group-card h3, .profile-name strong,
+.profile-fields strong, .settings-row strong, .patient-last strong, .clinician-food-detail small,
+.feeling-summary, .patient-history-note { font-size: var(--type-meta); }
+.week-day, .patient-diary-date, .range-control button, .mobile-nav button { min-height: 44px; }
+
+.auth-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 36px;
+  background: radial-gradient(ellipse at 15% 12%, #f0eee3 0, transparent 34%), var(--canvas);
+}
+.auth-layout {
+  width: min(1080px, 100%);
+  min-height: 680px;
+  display: grid;
+  grid-template-columns: 1.03fr .97fr;
+  overflow: hidden;
+  border: 1px solid #ebe9e0;
+  border-radius: 25px;
+  background: #fffefa;
+  box-shadow: 0 24px 75px rgb(45 57 46 / 10%);
+}
+.auth-story {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  overflow: hidden;
+  padding: 39px 42px;
+  color: #f8f7f1;
+  background: #486b57;
+}
+.auth-brand { z-index: 1; display: flex; width: fit-content; align-items: center; gap: 10px; color: inherit; font: 30px/1 var(--serif); letter-spacing: -.6px; text-decoration: none; }
+.auth-brand .brand-mark { color: #e3eadf; background: rgb(255 255 255 / 12%); }
+.auth-brand-dot, .auth-mobile-brand > span { color: #e4bd83; }
+.auth-story-copy { position: relative; z-index: 1; max-width: 430px; margin: auto 0; padding: 65px 0; }
+.auth-overline { display: flex; align-items: center; gap: 9px; color: #d1ddce; font-size: 12px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
+.auth-overline i { width: 7px; height: 7px; border-radius: 50%; background: #e8c994; }
+.auth-story-copy h1 { margin: 20px 0 17px; font: 58px/1.06 var(--serif); font-weight: 400; letter-spacing: -.04em; }
+.auth-story-copy p { max-width: 365px; margin: 0; color: #dce5da; font-size: 17px; line-height: 1.7; }
+.auth-note { position: relative; z-index: 1; width: min(100%, 350px); padding: 18px 20px; border: 1px solid rgb(255 255 255 / 15%); border-radius: 14px; background: rgb(255 255 255 / 7%); }
+.auth-note > span { display: block; height: 28px; color: #e9c78c; font: 43px/1 var(--serif); }
+.auth-note p { margin: 2px 0 8px; font: 20px/1.4 var(--serif); }
+.auth-note small { color: #cdd8ca; font-size: 13px; }
+.auth-orbit { position: absolute; right: -140px; bottom: 106px; width: 410px; height: 410px; border: 1px solid rgb(255 255 255 / 9%); border-radius: 50%; pointer-events: none; }
+.auth-orbit-two { right: -88px; bottom: 158px; width: 306px; height: 306px; }
+.auth-panel { align-self: center; width: 100%; max-width: 520px; margin: 0 auto; padding: 55px 60px; }
+.auth-mobile-brand { display: none; color: var(--green); font: 27px/1 var(--serif); }
+.auth-form-heading { margin-bottom: 30px; }
+.auth-kicker { margin: 0 0 9px; color: #70836f; font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+.auth-form-heading h2 { margin: 0 0 9px; color: #303b33; font: 34px/1.14 var(--serif); font-weight: 400; letter-spacing: -.025em; }
+.auth-intro { margin: 0; color: #7b847c; font-size: 15px; line-height: 1.6; }
+.auth-form { display: grid; gap: 17px; }
+.auth-field { display: grid; gap: 8px; color: #46544a; font-size: 14px; font-weight: 600; }
+.auth-field input { width: 100%; min-width: 0; min-height: 54px; padding: 0 15px; border: 1px solid #e0e3da; border-radius: 10px; color: #303b33; background: #fff; font: 16px var(--sans); transition: border-color .18s, box-shadow .18s; }
+.auth-field input::placeholder { color: #a2a79f; }
+.auth-field input:focus-visible { border-color: #809a83; outline: none; box-shadow: 0 0 0 3px rgb(126 157 130 / 18%); }
+.auth-password-wrap { position: relative; display: block; }
+.auth-password-wrap input { padding-right: 70px; }
+.auth-password-toggle { position: absolute; top: 50%; right: 9px; min-width: 52px; min-height: 40px; padding: 0 7px; transform: translateY(-50%); border: 0; border-radius: 7px; color: #58745f; background: transparent; font-size: 14px; font-weight: 600; }
+.auth-password-toggle:hover { background: #f1f4ef; }
+.auth-forgot-row { display: flex; justify-content: flex-end; margin-top: -6px; }
+.auth-link { padding: 2px 0; border: 0; color: #507258; background: transparent; font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.auth-link:hover { color: #34583f; text-decoration: underline; text-underline-offset: 3px; }
+.auth-submit { min-height: 54px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 2px; padding: 0 18px; border: 0; border-radius: 10px; color: white; background: #416e59; box-shadow: 0 5px 13px rgb(65 110 89 / 15%); font-size: 16px; font-weight: 650; transition: background .18s, transform .18s; }
+.auth-submit:hover:not(:disabled) { background: #355c49; transform: translateY(-1px); }
+.auth-submit:disabled { cursor: wait; opacity: .75; }
+.auth-spinner { width: 16px; height: 16px; border: 2px solid rgb(255 255 255 / 45%); border-top-color: white; border-radius: 50%; animation: auth-spin .7s linear infinite; }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+.auth-message { margin: 0; padding: 10px 12px; border-radius: 8px; font-size: 14px; line-height: 1.5; }
+.auth-error { color: #9b443d; background: #fbefec; }
+.auth-success { color: #426b4d; background: #edf4eb; }
+.auth-switch { margin-top: 24px; color: #737e74; font-size: 14px; text-align: center; }
+.auth-switch .auth-link { margin-left: 4px; }
+.auth-footnote { margin: 34px 0 0; color: #9a9e96; font-size: 12px; text-align: center; }
+.sign-out-button { min-height: 42px; padding: 0 10px; border: 0; color: #637367; background: transparent; font-size: 14px; }
+.sign-out-button:hover { color: var(--green); }
+
+@media (max-width: 900px) {
+  .auth-page { min-height: 100svh; align-items: start; padding: 0; background: #fffefa; }
+  .auth-layout { width: 100%; min-height: 100svh; grid-template-columns: 1fr; overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
+  .auth-story { min-height: 195px; padding: 27px 25px 23px; }
+  .auth-brand, .auth-note, .auth-orbit { display: none; }
+  .auth-story-copy { padding: 0; }
+  .auth-overline { font-size: 11px; }
+  .auth-story-copy h1 { margin: 13px 0 8px; font-size: 36px; }
+  .auth-story-copy p { max-width: 500px; font-size: 15px; }
+  .auth-panel { align-self: start; max-width: 570px; padding: 30px 28px 35px; }
+  .auth-mobile-brand { display: inline-block; margin-bottom: 28px; }
+  .auth-form-heading { margin-bottom: 25px; }
+  .auth-form { gap: 15px; }
+  .sign-out-button { min-height: 42px; }
+}
+@media (max-width: 420px) {
+  .auth-story { min-height: 182px; padding: 23px 21px 20px; }
+  .auth-story-copy h1 { font-size: 33px; }
+  .auth-panel { padding: 25px 21px calc(27px + env(safe-area-inset-bottom)); }
+  .auth-mobile-brand { margin-bottom: 24px; }
+  .auth-form-heading h2 { font-size: 30px; }
+}
+.primary-button, .auth-submit { font-size: 16px; }
+.outline-button, .text-button, .nav-link, .add-food-button, .back-link, .details-button,
+.back-button, .role-switch, .sign-out-button, .range-control button, .mobile-nav button { font-size: 14px; }
+.week-day > span, .week-day > strong, .patient-diary-date, .diary-day-heading > span,
+.day-overview p strong, .chart-y-axis, .chart-dates, .weight-current { font-size: var(--type-meta); }
+.patient-detail-title .subhead, .clinician-meal .text-button, .food-amount .text-input,
+.profile-edit-fields .primary-button { font-size: var(--type-meta); }
+.patient-detail-title h1 { font-size: clamp(2rem, 4vw, 2.625rem); }
+.nav-count, .avatar, .xp-level strong, .discovery-stats small, .chart-point b,
+.no-diary-moments, .dietitian-note-card > small, .report-panel > div:first-child p,
+.settings-avatar > div p, .photo-picker > div strong, .food-amount summary,
+.group-count span, .xp-toast { font-size: var(--type-meta); }
+.food-amount .text-input { font-size: var(--type-body); }
+.skip-feeling { font-size: var(--type-meta); }
+.topbar-actions { gap: 10px; }
+@media (max-width: 800px) {
+  .topbar-actions { gap: 2px; }
+  .role-switch, .sign-out-button { min-height: 38px; padding-right: 5px; padding-left: 5px; font-size: 12px; }
+}
