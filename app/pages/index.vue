@@ -32,6 +32,17 @@ const greeting = computed(() => {
 
 const role = ref<'patient' | 'dietitian'>('patient')
 const activeView = ref<ViewName>('home')
+type AuthView = 'login' | 'signup' | 'forgot' | 'reset'
+const isAuthenticated = ref(false)
+const authView = ref<AuthView>('login')
+const authName = ref('')
+const authEmail = ref('')
+const authPassword = ref('')
+const authPasswordConfirm = ref('')
+const authError = ref('')
+const authStatus = ref('')
+const authLoading = ref(false)
+const showPassword = ref(false)
 const currentDate = ref(todayKey)
 const meals = ref<Meal[]>([
   {
@@ -294,6 +305,55 @@ function setView(view: ViewName) {
   if (view === 'home') currentDate.value = todayKey
 }
 
+function setAuthView(view: AuthView) {
+  authView.value = view
+  authError.value = ''
+  authStatus.value = ''
+  authPassword.value = ''
+  authPasswordConfirm.value = ''
+}
+
+async function submitAuth() {
+  authError.value = ''
+  authStatus.value = ''
+  if (authView.value === 'signup' && !authName.value.trim()) {
+    authError.value = 'Enter your name to create an account.'
+    return
+  }
+  if (authView.value === 'login' || authView.value === 'signup' || authView.value === 'reset') {
+    if (authPassword.value.length < 8) {
+      authError.value = 'Use at least 8 characters for your password.'
+      return
+    }
+  }
+  if ((authView.value === 'signup' || authView.value === 'reset') && authPassword.value !== authPasswordConfirm.value) {
+    authError.value = 'Those passwords don’t match yet.'
+    return
+  }
+
+  authLoading.value = true
+  await new Promise(resolve => setTimeout(resolve, 450))
+  authLoading.value = false
+
+  if (authView.value === 'forgot') {
+    authStatus.value = 'Password reset isn’t connected in this preview. You can still explore the reset form.'
+    authView.value = 'reset'
+  } else if (authView.value === 'reset') {
+    setAuthView('login')
+    authStatus.value = 'Password updates aren’t connected in this preview.'
+  } else {
+    if (authView.value === 'signup') profile.value.name = authName.value.trim()
+    isAuthenticated.value = true
+  }
+}
+
+function signOut() {
+  isAuthenticated.value = false
+  setAuthView('login')
+  authPassword.value = ''
+  authPasswordConfirm.value = ''
+}
+
 function toggleRole() {
   role.value = role.value === 'patient' ? 'dietitian' : 'patient'
   activeView.value = role.value === 'dietitian' ? 'dashboard' : 'home'
@@ -329,7 +389,57 @@ function openPatient(patient: typeof patients[number]) {
 </script>
 
 <template>
-  <div class="app-shell" :class="{ 'is-dietitian': isDietitian }">
+  <main v-if="!isAuthenticated" class="auth-page">
+    <div class="auth-layout">
+      <section class="auth-story" aria-label="Welcome to Bite">
+        <a class="auth-brand" href="#" aria-label="Bite"><span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 18.5c0-5.6 4.4-10 10-10s10 4.4 10 10H6Z" /><path d="M8.5 22h15M11 25h10M16 8.5V5" /><path d="M11 12.5 9.5 10M21 12.5l1.5-2" /></svg></span><span>Bite<span class="auth-brand-dot">.</span></span></a>
+        <div class="auth-story-copy">
+          <span class="auth-overline"><i></i> A softer way to keep track</span>
+          <h1>Your food.<br>Your story.</h1>
+          <p>Make room for the small moments, the meals you love, and the way your days unfold.</p>
+        </div>
+        <div class="auth-note"><span>“</span><p>There’s no perfect way to eat. Just your way.</p><small>A little reminder from Bite</small></div>
+        <span class="auth-orbit auth-orbit-one" aria-hidden="true"></span><span class="auth-orbit auth-orbit-two" aria-hidden="true"></span>
+      </section>
+
+      <section class="auth-panel" :aria-labelledby="`auth-title-${authView}`">
+        <div class="auth-form-heading">
+          <span class="auth-mobile-brand">Bite<span>.</span></span>
+          <p class="auth-kicker">{{ authView === 'signup' ? 'A fresh start, whenever you’re ready' : authView === 'forgot' || authView === 'reset' ? 'A little help getting back in' : 'Welcome back' }}</p>
+          <h2 :id="`auth-title-${authView}`">{{ authView === 'signup' ? 'Create your account' : authView === 'forgot' ? 'Forgot your password?' : authView === 'reset' ? 'Choose a new password' : 'Good to see you.' }}</h2>
+          <p class="auth-intro">{{ authView === 'signup' ? 'Your food story starts with a few little details.' : authView === 'forgot' ? 'Enter your email and we’ll help you find your way back.' : authView === 'reset' ? 'Choose a new password for your Bite account.' : 'Sign in to pick up where your food story left off.' }}</p>
+        </div>
+
+        <form class="auth-form" @submit.prevent="submitAuth">
+          <label v-if="authView === 'signup'" class="auth-field" for="auth-name">Name
+            <input id="auth-name" v-model="authName" type="text" name="name" autocomplete="name" placeholder="Your name" required>
+          </label>
+          <label v-if="authView !== 'reset'" class="auth-field" for="auth-email">Email
+            <input id="auth-email" v-model="authEmail" type="email" name="email" autocomplete="email" placeholder="you@example.com" required>
+          </label>
+          <template v-if="authView === 'login' || authView === 'signup' || authView === 'reset'">
+            <label class="auth-field" for="auth-password">{{ authView === 'reset' ? 'New password' : 'Password' }}
+              <span class="auth-password-wrap"><input id="auth-password" v-model="authPassword" :type="showPassword ? 'text' : 'password'" :autocomplete="authView === 'reset' ? 'new-password' : authView === 'signup' ? 'new-password' : 'current-password'" :placeholder="authView === 'reset' ? 'At least 8 characters' : 'Enter your password'" minlength="8" required><button type="button" class="auth-password-toggle" :aria-label="showPassword ? 'Hide password' : 'Show password'" :aria-pressed="showPassword" @click="showPassword = !showPassword">{{ showPassword ? 'Hide' : 'Show' }}</button></span>
+            </label>
+            <label v-if="authView === 'signup' || authView === 'reset'" class="auth-field" for="auth-password-confirm">Confirm password
+              <input id="auth-password-confirm" v-model="authPasswordConfirm" type="password" autocomplete="new-password" placeholder="Enter your password again" minlength="8" required>
+            </label>
+          </template>
+          <div v-if="authView === 'login'" class="auth-forgot-row"><button type="button" class="auth-link" @click="setAuthView('forgot')">Forgot password?</button></div>
+          <p v-if="authError" class="auth-message auth-error" role="alert">{{ authError }}</p>
+          <p v-if="authStatus" class="auth-message auth-success" role="status" aria-live="polite">{{ authStatus }}</p>
+          <button class="auth-submit" type="submit" :disabled="authLoading">{{ authLoading ? 'Just a moment…' : authView === 'signup' ? 'Create account' : authView === 'forgot' ? 'Send reset instructions' : authView === 'reset' ? 'Reset password' : 'Log in' }}<span v-if="authLoading" class="auth-spinner" aria-hidden="true"></span></button>
+        </form>
+        <div class="auth-switch">
+          <template v-if="authView === 'login'">Don’t have an account? <button class="auth-link" @click="setAuthView('signup')">Create an account</button></template>
+          <template v-else-if="authView === 'signup'">Already have an account? <button class="auth-link" @click="setAuthView('login')">Log in</button></template>
+          <template v-else><button class="auth-link" @click="setAuthView('login')">← Back to log in</button></template>
+        </div>
+        <p class="auth-footnote">Preview mode · account services aren’t connected yet.</p>
+      </section>
+    </div>
+  </main>
+  <div v-else class="app-shell" :class="{ 'is-dietitian': isDietitian }">
     <aside class="sidebar">
       <a class="brand" href="#" aria-label="Bite home" @click.prevent="setView(isDietitian ? 'patients' : 'home')">
         <span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 18.5c0-5.6 4.4-10 10-10s10 4.4 10 10H6Z" /><path d="M8.5 22h15M11 25h10M16 8.5V5" /><path d="M11 12.5 9.5 10M21 12.5l1.5-2" /></svg></span>
@@ -369,6 +479,7 @@ function openPatient(patient: typeof patients[number]) {
         <div class="breadcrumb"><span>{{ isDietitian ? 'Workspace' : 'Your food journal' }}</span><span class="breadcrumb-divider">/</span><strong>{{ isDietitian ? activeView === 'dashboard' ? 'Dashboard' : activeView === 'patients' || activeView === 'patient-detail' ? 'Patients' : activeView === 'reports' ? 'Reports' : 'Settings' : activeView === 'home' ? 'Today' : activeView === 'diary' ? 'My diary' : activeView === 'explore' ? 'Food explorer' : 'My profile' }}</strong></div>
         <div class="topbar-actions">
           <span class="sync-status"><i></i>{{ isDietitian ? 'All caught up' : 'A good day to begin' }}</span>
+          <button class="sign-out-button" @click="signOut">Log out</button>
           <button class="role-switch" @click="toggleRole">
             <span class="switch-icon">↗</span><span>Preview {{ isDietitian ? 'patient' : 'dietitian' }} view</span>
           </button>
